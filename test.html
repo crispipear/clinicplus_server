@@ -23,6 +23,9 @@
            let message = $('#input').val()
            socket.emit('post_message', {message: message})
         })
+        socket.on('send_message', data => {
+          console.log('incoming data: ', data)
+        })
     })
 </script>
 </html>
