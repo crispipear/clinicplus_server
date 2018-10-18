@@ -7,12 +7,31 @@
     <title>test app</title>
 </head>
 <body>
-    <input id="input" type="text">
+    <textarea id="input" cols="40", rows="10"></textarea>
+    <br/>
     <button id="submit">submit</button>
 </body>
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 <script>
+    $(document).delegate('#input', 'keydown', function(e) {
+        var keyCode = e.keyCode || e.which;
+
+        if (keyCode == 9) {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+
+            // set textarea value to: text before caret + tab + text after caret
+            $(this).val($(this).val().substring(0, start)
+                        + "\t"
+                        + $(this).val().substring(end));
+
+            // put caret at right position again
+            this.selectionStart =
+            this.selectionEnd = start + 1;
+        }
+    })
     $(document).ready(function(){
         // var ip = '10.156.0.1'
         var ip = 'localhost'
@@ -20,8 +39,9 @@
         var url = 'http://'+ip+':'+port
         var socket = io.connect(url)
         $('#submit').click(function (){
-           let message = $('#input').val()
-           socket.emit('post_message', {message: message})
+           let req_msg = $('#input').val()
+           console.log(JSON.parse(req_msg))
+           socket.emit('post_message', JSON.parse(req_msg))
         })
         socket.on('send_message', data => {
           console.log('incoming data: ', data)

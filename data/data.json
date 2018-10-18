@@ -1,0 +1,32 @@
+{
+    "patients": [
+        {
+            "name": "Jane Doe",
+            "age": 30,
+            "id": 1101,
+            "appointments": [
+                "A0132"
+            ]
+        },
+        {
+            "name": "John Doe",
+            "age": 24,
+            "id": 1102,
+            "appointments": [
+                "A0130"
+            ]
+        }
+    ],
+    "appointments": [
+        {
+            "id": "A0132",
+            "date": "10/19/2019",
+            "time": "12:30 PM"
+        },
+        {
+            "id": "A0130",
+            "date": "10/19/2019",
+            "time": "2:30 PM"
+        }
+    ]
+}
