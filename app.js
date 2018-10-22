@@ -49,6 +49,11 @@ app.get("/patients", (req, res) => {
   res.json(data.patients)
 })
 
+app.get("/appointments", (req, res) => {
+  let data = require('./data/data.json')
+  res.json(data.appointments)
+})
+
 app.get("/patients/:id", (req, res) => {
   let data = require('./data/data.json')
   let filtered = data.patients.find(f => f.id == req.params.id)
@@ -99,7 +104,7 @@ function validateData(data){
     }
     storeData(JSON.stringify(currentData, null, 4))
   }
-}
+} 
 
 function getFilteredData(current, dataType, incoming){
   let filtered = current[dataType].find(f => f.id == incoming.id)
