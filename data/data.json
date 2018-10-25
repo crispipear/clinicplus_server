@@ -15,12 +15,6 @@
             "appointments": [
                 10130
             ]
-        },
-        {
-            "name": "Su Li",
-            "age": 21,
-            "id": 1103,
-            "appointments": []
         }
     ],
     "appointments": [
@@ -33,12 +27,6 @@
             "id": 10130,
             "date": "10/21/2018",
             "time": "9 AM"
-        },
-        {
-            "date": "",
-            "time": "",
-            "id": 0,
-            "appointments": []
         }
     ]
 }

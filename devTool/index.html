@@ -6,18 +6,17 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Clinic+ Server Dev Tools</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-</head>
 <style>
     body{
         margin: 0%
     }
     .container-fluid{
-        padding: 5%
+        padding: 5%;
     }
     h1{
         color: #4d2f77;
         font-size: 27px;
-        margin-bottom: 2.5%;
+        margin: 0% 0% 2.5% 0%;
     }
     h3{
         font-size: 18px;
@@ -32,62 +31,53 @@
     .response div{
         border-radius: 15px;
         border: solid gray 1px;
-        min-height: 25vh;
+        min-height: 20vh;
         padding: 5%;
     }
     .request-group{
         margin-bottom: 5%;
     }
+    .request_options div span{
+        margin-right: 5%
+    }
+    .request_form{
+        margin-top: 5%;
+    }
+    #submit{
+        margin-top: 2.5%;
+    }
+    #version{
+        position: absolute;
+        bottom: 2.5%;
+        left: 2.5%
+    }
 </style>
+</head>
 <body>
     <div class="container-fluid">
         <h1>Clinic+ Server Dev Tool</h1>
         <div class="row">
             <div class="col-7">
-                <div class="request-group" data-action="create" data-type="patients">
-                    <h3>Create Patient</h3>
-                    <div class="form-group row">
-                        <label for="example-text-input" class="col-2 col-form-label">Name</label>
-                        <div class="col-7">
-                            <input name="name" class="form-control" type="text">
-                        </div>
+                <div class="request_options row">
+                    <div class="col-6">
+                        <span>request type</span>
+                        <select id="request_type">
+                            <option value="patients">patients</option>
+                            <option value="appointments">appointments</option>
+                        </select>
                     </div>
-                    <div class="form-group row">
-                        <label for="example-text-input" class="col-2 col-form-label">Age</label>
-                        <div class="col-7">
-                            <input name="age" class="form-control" type="text">
-                        </div>
+                    <div class="col-6">
+                        <span>request action</span>
+                        <select id="request_action">
+                            <option value="create">create</option>
+                            <option value="edit">edit</option>
+                            <option value="delete">delete</option>                            
+                        </select>
                     </div>
-                    <div class="form-group row">
-                        <label for="example-text-input" class="col-2 col-form-label">Id</label>
-                        <div class="col-7">
-                            <input name="id" class="form-control" type="text">
-                        </div>
-                    </div>
-                    <button id="submit" type="submit" class="col-2 btn btn-primary">Submit</button>
                 </div>
-                <div class="request-group" data-action="create" data-type="appointments">
-                    <h3>Create Appointment</h3>
-                    <div class="form-group row">
-                        <label for="example-text-input" class="col-2 col-form-label">Date</label>
-                        <div class="col-7">
-                            <input name="date" class="form-control" type="text">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="example-text-input" class="col-2 col-form-label">Time</label>
-                        <div class="col-7">
-                            <input name="time" class="form-control" type="text">
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <label for="example-text-input" class="col-2 col-form-label">Id</label>
-                        <div class="col-7">
-                            <input name="id" class="form-control" type="text">
-                        </div>
-                    </div>
-                    <button id="submit" type="submit" class="col-2 btn btn-primary">Submit</button>
+                <div class="request_form row">
                 </div>
+                <button id="submit" type="submit" class="col-3 btn btn-primary">Submit</button>
             </div>
             <div class="col-5">
                 <div class="payload">
@@ -101,6 +91,7 @@
                 </div>
             </div>
         </div>
+        <span id="version"></span>
     </div>
 </body>
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
@@ -126,22 +117,64 @@
     })
     $(document).ready(function(){
         // var ip = '10.156.0.1'
-        var ip = 'localhost'
-        var port = '3000'
-        var url = 'http://'+ip+':'+port
-        var socket = io.connect(url)
-        socket.on('send_message', data => {
-          console.log('incoming data: ', data)
+        var ip              = 'localhost',
+            port            = '3000',
+            url             = 'http://'+ip+':'+port,
+            socket          = io.connect(url),
+            request_type    = 'patients',
+            request_action  = 'create',
+            request_props   = [
+                {
+                    type: 'appointments',
+                    props: ['date', 'time']
+                },
+                {
+                    type: 'patients',
+                    props: ['name', 'age']
+                }
+            ]
+
+    
+        socket.on('response', data => {
+            $('.response div').text(data.res)
         })
 
-        $('.request-group #submit').click(function() {
-            let requestGroup = $(this).parent().get(0)
-            let action = $(requestGroup).data('action')
-            let type = $(requestGroup).data('type')
-            let inputs = $(requestGroup).find('input:text')
+        socket.on('init', data => {
+            $('#version').text('server version: ' + data.version)
+        })
+
+        $('#request_type').change(function(){
+            $('.request_form').empty()
+            request_type = $(this).find(":selected").text()
+            updateFormGroups()
+        })
+        $('#request_action').change(function(){
+            request_action = $(this).find(":selected").text()
+        })
+        updateFormGroups()
+        function updateFormGroups(){
+            let selected = request_props.find(item => item.type == request_type)
+            let idGroup = "<div class='form-group col-10 row'>"+
+                                "<label class='col-3 col-form-label'>id</label>"+
+                                "<div class='col-7'>"+
+                                "<input name='id' class='form-control' type='text'>"+
+                                "</div></div>"
+            $('.request_form').append(idGroup)
+            $.each(selected.props, function(index, prop){
+                let formGroup = "<div class='form-group col-10 row'>"+
+                                "<label class='col-3 col-form-label'>"+prop+"</label>"+
+                                "<div class='col-7'>"+
+                                "<input name="+prop+" class='form-control' type='text'>"+
+                                "</div></div>"
+                $('.request_form').append(formGroup)
+            })
+        }
+
+        $('#submit').click(function() {
+            let inputs = $('.request_form').find('input:text')
             let req_body = {
-                type: type,
-                action: action,
+                type: request_type,
+                action: request_action,
                 dataComponent: {}
             }
             $.each(inputs, function(key, input){

@@ -11,9 +11,13 @@ install node
 ### Data Payload
 
 When sending in data, include the keys: 
+
 **"type"** - "patients", "appointments" 
+
 **"action"** - "create", "edit", "delete" 
+
 **"id"** - the id of the specific item
+
 **"dataComponent"** - individual data item that needs to be modified (can be excluded when `"action": "delete"`)
 
 example (edit the name of exisiting patient):

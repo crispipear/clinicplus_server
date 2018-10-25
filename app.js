@@ -4,14 +4,17 @@ var express         = require("express"),
     metadata        = require('./data/metadata.json'),
     PORT            = 3000,
     NETWORK_IP      = require('os').networkInterfaces().en0[1].address,
-    fs              = require('fs')
+    fs              = require('fs'),
+    package         = require('./package.json')
+
 
 
 //on load store metadata to data
 storeData(JSON.stringify(metadata, null, 4))
 
 var server = app.listen(PORT, () => {
- console.log(`Server running on ${NETWORK_IP}:${PORT}`)
+  console.log('Server version: ', package.version)
+  console.log(`Server running on ${NETWORK_IP}:${PORT}`)
 })
 
 var io = require('socket.io')(server)
@@ -31,8 +34,8 @@ io.on('connection', socket => {
     socket.on('post_message', payload => {
       validateData(payload)
     })
+    io.sockets.emit('init', {version: package.version})
 })
-
 //routes//
 app.get("/", (req, res) => {
 //  res.json(metadata)
@@ -80,7 +83,10 @@ function validateData(data){
           appointments: ["date", "time"]
         }
         let propsValidation = dataProps[data.type].every(prop => data.dataComponent.hasOwnProperty(prop))
-        if (propsValidation && (filtered == null || filtered == undefined)) {
+        if(!isEmptyValue(filtered)){
+          io.sockets.emit('response', {res: `${data.type} id ${data.id}: already exists in database`})
+        }
+        if (propsValidation && isEmptyValue(filtered)) {
           let newData = data.dataComponent
           newData.id = data.id
           newData.appointments = []
@@ -89,16 +95,24 @@ function validateData(data){
         }
         break;
       case "edit":
-        if(filtered != undefined || filtered != null){
+        if(!isEmptyValue(filtered)){
           let keys = Object.getOwnPropertyNames(data.dataComponent)
-          keys.map(key => filtered[key] = data.dataComponent[key])
+          keys.map(key =>  {
+              if(!isEmptyValue(data.dataComponent[key])){
+                filtered[key] = data.dataComponent[key]
+              }
+            })
+        }else{
+          io.sockets.emit('response', {res: `${data.type} id ${data.id}: does not exist in database`})
         }
         break;
       case "delete":
-        if(filtered != undefined || filtered != null){
+        if(!isEmptyValue(filtered)){
           let itemIndex = currentData[data.type].indexOf(filtered)
           currentData[data.type].splice(itemIndex, 1)
           console.log(`creating new data ${data.type} at id ${data.id}`)
+        }else{
+          io.sockets.emit('response', {res: `${data.type} id ${data.id}: does not exist in database`})
         }
         break;
     }
@@ -108,13 +122,16 @@ function validateData(data){
 
 function getFilteredData(current, dataType, incoming){
   let filtered = current[dataType].find(f => f.id == incoming.id)
-  if(filtered != undefined || filtered != null){
+  if(!isEmptyValue(filtered)){
     console.log(`found ${incoming.type} at id ${incoming.id}`)
     return filtered
   }else{
-    console.log(`${incoming.type} id: ${incoming.id} does not exist in database`)
     return null
   }
+}
+
+function isEmptyValue(val){
+  return val == null || val == undefined || val == ""
 }
 
 function storeData(data){
