@@ -3,7 +3,7 @@ var express         = require("express"),
     readline        = require("readline"),
     metadata        = require('./data/metadata.json'),
     PORT            = 3000,
-    NETWORK_IP      = require('os').networkInterfaces().en0[1].address,
+    os              = require('os'),
     fs              = require('fs'),
     package         = require('./package.json')
 
@@ -14,7 +14,11 @@ storeData(JSON.stringify(metadata, null, 4))
 
 var server = app.listen(PORT, () => {
   console.log('Server version: ', package.version)
-  console.log(`Server running on ${NETWORK_IP}:${PORT}`)
+  if(os.networkInterfaces().hasOwnProperty('en0')){
+    console.log(`Server running on ${os.networkInterfaces().en0[1].address}:${PORT}`)
+  }else{
+    console.log(`No internet, server running on localhost:${PORT}`)
+  }
 })
 
 var io = require('socket.io')(server)
@@ -89,7 +93,9 @@ function validateData(data){
         if (propsValidation && isEmptyValue(filtered)) {
           let newData = data.dataComponent
           newData.id = data.id
-          newData.appointments = []
+          if(data.type == 'patients'){
+            newData.appointments = []
+          }
           currentData[data.type].push(newData)
           console.log(`creating new data ${data.type} at id ${data.id}`)
         }
