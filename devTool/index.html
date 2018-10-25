@@ -46,10 +46,13 @@
     #submit{
         margin-top: 2.5%;
     }
-    #version{
+    #server_info{
         position: absolute;
         bottom: 2.5%;
         left: 2.5%
+    }
+    #version{
+        color: gray
     }
 </style>
 </head>
@@ -91,7 +94,7 @@
                 </div>
             </div>
         </div>
-        <span id="version"></span>
+        <p id="server_info">server status: <span id="status"></span> | version: <span id="version"> - </span></p>
     </div>
 </body>
 <script src="http://code.jquery.com/jquery-latest.min.js"></script>
@@ -139,8 +142,18 @@
             $('.response div').text(data.res)
         })
 
+        socket.io.on('connect_error', function(err) {
+            $('#status').text('disconnected')
+            $('#status').css('color', 'red')
+        });
+
+        socket.on('connect', function(){
+            $('#status').text('connected')
+            $('#status').css('color', 'green')
+        })
+
         socket.on('init', data => {
-            $('#version').text('server version: ' + data.version)
+            $('#version').text(data.version)
         })
 
         $('#request_type').change(function(){
