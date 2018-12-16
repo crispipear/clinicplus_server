@@ -38,8 +38,12 @@ io.on('connection', socket => {
     socket.on('post_message', payload => {
       validateData(payload)
     })
+    socket.on('create_appointment', payload => {
+      validateData(payload)
+    })
     io.sockets.emit('init', {version: package.version})
 })
+
 //routes//
 app.get("/", (req, res) => {
 //  res.json(metadata)
@@ -84,7 +88,7 @@ function validateData(data){
       case "create":
         const dataProps = {
           patients: ["name", "age"],
-          appointments: ["date", "time"]
+          appointments: ["user", "date", "time", "type", "symptoms"]
         }
         let propsValidation = dataProps[data.type].every(prop => data.dataComponent.hasOwnProperty(prop))
         if(!isEmptyValue(filtered)){
@@ -95,6 +99,11 @@ function validateData(data){
           newData.id = data.id
           if(data.type == 'patients'){
             newData.appointments = []
+          }
+          if(data.type == 'appointments'){
+            let user = currentData.patients.find(p => p.id == data.dataComponent.user)
+            let index = currentData.patients.indexOf(user)
+            currentData.patients[index].appointments.push(data.id)
           }
           currentData[data.type].push(newData)
           console.log(`creating new data ${data.type} at id ${data.id}`)

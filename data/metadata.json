@@ -4,25 +4,21 @@
             "name": "Jane Doe",
             "age": 30,
             "id": 1101,
-            "appointments": [10132]
+            "appointments": []
         },
         {
             "name": "John Doe",
-            "age": 24,
+            "age": 44,
             "id": 1102,
-            "appointments": [10130]
+            "appointments": []
+        },
+        {
+            "name": "Marcus Anderson",
+            "age": 24,
+            "id": 1105,
+            "appointments": []
         }
     ],
     "appointments": [
-        {
-            "id": 10132,
-            "date": "10/21/2018",
-            "time": "11 AM"
-        },
-        {
-            "id": 10130,
-            "date": "10/21/2018",
-            "time": "9 AM"
-        }
     ]
 }
