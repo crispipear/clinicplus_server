@@ -19,7 +19,7 @@ $(document).delegate('#input', 'keydown', function(e) {
 $(document).ready(function(){
     // var ip = '10.156.0.1'
     var ip              = 'localhost',
-        port            = '3000',
+        port            = '3001',
         url             = 'http://'+ip+':'+port,
         socket          = io.connect(url),
         request_type    = 'patients',

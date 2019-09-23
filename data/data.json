@@ -16,22 +16,8 @@
             "name": "Marcus Anderson",
             "age": 24,
             "id": 1105,
-            "appointments": [
-                10135
-            ]
+            "appointments": []
         }
     ],
-    "appointments": [
-        {
-            "user": 1105,
-            "type": "sick visit",
-            "date": "04/27/2018",
-            "time": "11:00 AM - 11:45 AM",
-            "symptoms": [
-                "Fatigue",
-                "Dizziness"
-            ],
-            "id": 10135
-        }
-    ]
+    "appointments": []
 }

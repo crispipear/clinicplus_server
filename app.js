@@ -2,15 +2,19 @@ var express         = require("express"),
     app             = express(),
     readline        = require("readline"),
     metadata        = require('./data/metadata.json'),
-    PORT            = 3000,
+    PORT            = 3001,
     os              = require('os'),
     fs              = require('fs'),
-    package         = require('./package.json')
+    package         = require('./package.json'),
+    bodyParser      = require('body-parser')
 
 
 
 //on load store metadata to data
 storeData(JSON.stringify(metadata, null, 4))
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 var server = app.listen(PORT, () => {
   console.log('Server version: ', package.version)
@@ -19,6 +23,38 @@ var server = app.listen(PORT, () => {
   }else{
     console.log(`No internet, server running on localhost:${PORT}`)
   }
+})
+var urlencodedParser = bodyParser.urlencoded({extended: false});
+
+// Add headers
+app.use(function (req, res, next) {
+
+  // Website you wish to allow to connect
+  res.setHeader('Access-Control-Allow-Origin', 'http://192.168.1.24:3000');
+
+  // Request methods you wish to allow
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+  // Request headers you wish to allow
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+  // Set to true if you need the website to include cookies in the requests sent
+  // to the API (e.g. in case you use sessions)
+  res.setHeader('Access-Control-Allow-Credentials', true);
+
+  // Pass to next layer of middleware
+  next();
+});
+
+var temp = {}
+app.post("/login", urlencodedParser, (req, res) => {
+  console.log(req.body)
+  temp = req.body
+  res.status(200).send('done')
+})
+
+app.get("/users", (req, res) => {
+  res.json(temp)
 })
 
 var io = require('socket.io')(server)
@@ -76,6 +112,8 @@ app.get("/appointments/:id", (req, res) => {
   let filtered = data.appointments.find(f => f.id == req.params.id)
   res.json(filtered)
 })
+
+
 //end routes//
 
 function validateData(data){
